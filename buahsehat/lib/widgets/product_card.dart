@@ -54,7 +54,7 @@ class _ProductCardState extends State<ProductCard> {
               children: [
                 /// IMAGE
                 Positioned.fill(
-                  child: Image.asset(
+                  child: Image.network(
                     widget.image,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {

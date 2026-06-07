@@ -43,7 +43,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             // ================= IMAGE =================
             Stack(
               children: [
-                Image.asset(
+                Image.network(
                   widget.image,
                   height: 280,
                   width: double.infinity,

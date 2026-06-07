@@ -9,14 +9,12 @@ class CategoriesPage extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
-
     final List<Map<String, dynamic>> categories = [
-      {'name': 'Fruits', 'items': '87 Items', 'icon': Icons.grain},
-      {'name': 'Vegetables', 'items': '24 Items', 'icon': Icons.eco},
-      {'name': 'Mushroom', 'items': '43 Items', 'icon': Icons.emoji_nature},
-      {'name': 'Dairy', 'items': '22 Items', 'icon': Icons.local_drink},
-      {'name': 'Oats', 'items': '64 Items', 'icon': Icons.rice_bowl},
-      {'name': 'Bread', 'items': '43 Items', 'icon': Icons.bakery_dining},
+      {'id': 1, 'name': 'Fruits', 'items': '87 Items', 'icon': Icons.grain},
+      {'id': 2, 'name': 'Vegetables', 'items': '24 Items', 'icon': Icons.eco},
+      {'id': 3, 'name': 'Mushroom', 'items': '43 Items', 'icon': Icons.emoji_nature},
+      {'id': 4, 'name': 'Dairy', 'items': '22 Items', 'icon': Icons.local_drink},
+      {'id': 5, 'name': 'Oats', 'items': '64 Items', 'icon': Icons.rice_bowl},        {'id': 6, 'name': 'Bread', 'items': '43 Items', 'icon': Icons.bakery_dining},
     ];
 
     return Scaffold(
@@ -59,7 +57,7 @@ class CategoriesPage extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (_) => const CategoryPage(),
                   settings: RouteSettings(
-                    arguments: {'name': item['name'], 'items': item['items']},
+                    arguments: {'id': item['id'], 'name': item['name'], 'items': item['items']},
                   ),
                 ),
               );

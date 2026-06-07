@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../models/category_model.dart';
+import '../services/category_service.dart';
 import '../pages/category/category_page.dart';
 import '../pages/category/categories_page.dart';
 
@@ -12,14 +14,13 @@ class Category extends StatefulWidget {
 class _CategoryState extends State<Category> {
   int selectedIndex = 0;
 
-  final icons = [
-    Icons.apple,
-    Icons.eco,
-    Icons.restaurant_menu,
-    Icons.lunch_dining,
-    Icons.bakery_dining,
-    Icons.local_dining,
-  ];
+ Future<List<CategoryModel>>? categoriesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    categoriesFuture = CategoryService.getCategories();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +39,7 @@ class _CategoryState extends State<Category> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const CategoryPage(),
+                      builder: (context) => const CategoriesPage(),
                     ),
                   );
                 },
@@ -68,58 +69,66 @@ class _CategoryState extends State<Category> {
 
           SizedBox(
             height: 90,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: icons.length,
-              itemBuilder: (context, i) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(20),
-                      onTap: () {
-                        setState(() {
-                          selectedIndex = i;
-                        });
+            child: FutureBuilder<List<CategoryModel>>(
+              future: categoriesFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const CategoriesPage(),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        width: 100,
-                        decoration: BoxDecoration(
-                          color: selectedIndex == i
-                              ? Colors.green
-                              : theme.cardColor,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Colors.green.withOpacity(0.3),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              blurRadius: 10,
-                              color: Colors.black.withOpacity(
-                                theme.brightness == Brightness.dark
-                                    ? 0.3
-                                    : 0.05,
-                              ),
+                if (snapshot.hasError) {
+                  return const Center(child: Text('Gagal memuat kategori'));
+                }
+
+                final categories = snapshot.data ?? [];
+
+                return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: categories.length,
+                  itemBuilder: (context, i) {
+                    final category = categories[i];
+
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(20),
+                        onTap: () {
+                          setState(() {
+                            selectedIndex = i;
+                          });
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const CategoriesPage(),
                             ),
-                          ],
-                        ),
-                        child: Icon(
-                          icons[i],
-                          color: selectedIndex == i
-                              ? Colors.white
-                              : Colors.green,
+                          );
+                        },
+                        child: Container(
+                          width: 120,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: selectedIndex == i
+                                ? Colors.green
+                                : theme.cardColor,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.green.withOpacity(0.3),
+                            ),
+                          ),
+                          child: Text(
+                            category.name,
+                            style: TextStyle(
+                              color: selectedIndex == i
+                                  ? Colors.white
+                                  : Colors.green,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 );
               },
             ),

@@ -1,9 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../pages/notification/notification_page.dart';
 
-class Header extends StatelessWidget {
+class Header extends StatefulWidget {
   const Header({super.key});
+
+  @override
+  State<Header> createState() => _HeaderState();
+}
+
+class _HeaderState extends State<Header> {
+  String userName = 'Guest';
+
+  @override
+  void initState() {
+    super.initState();
+    loadUser();
+  }
+
+  Future<void> loadUser() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      userName = prefs.getString('name') ?? 'Guest';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,15 +43,17 @@ class Header extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "Good Morning",
+                  "Halo Foodies👋",
                   style: GoogleFonts.poppins(
                     fontSize: 12,
                     color: colorScheme.onBackground.withOpacity(0.7),
                   ),
                 ),
+
                 const SizedBox(height: 4),
+
                 Text(
-                  "Samuel Witwicky",
+                  userName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(
@@ -59,24 +83,18 @@ class Header extends StatelessWidget {
                     ),
                   );
                 },
-
-                /// 👉 pakai warna theme
                 hoverColor: colorScheme.primary.withOpacity(0.1),
                 splashColor: colorScheme.primary.withOpacity(0.2),
                 highlightColor: Colors.transparent,
-
                 child: Padding(
                   padding: const EdgeInsets.all(6),
                   child: Stack(
                     children: [
-                      /// ICON
                       Icon(
                         Icons.notifications_none,
                         color: colorScheme.onBackground,
                         size: 24,
                       ),
-
-                      /// DOT NOTIFICATION
                       Positioned(
                         right: 0,
                         top: 0,

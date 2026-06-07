@@ -1,8 +1,64 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import '../home/home_page.dart';
+import 'package:http/http.dart' as http;
+import 'login_page.dart';
 
-class RegisterPage extends StatelessWidget {
+class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
+
+  @override
+  State<RegisterPage> createState() => _RegisterPageState();
+}
+
+class _RegisterPageState extends State<RegisterPage> {
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  bool isLoading = false;
+
+  Future<void> register() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://127.0.0.1:8000/api/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'name': nameController.text,
+          'email': emailController.text,
+          'password': passwordController.text,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Register berhasil')));
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginPage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? 'Register gagal')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,10 +68,8 @@ class RegisterPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-
       body: Stack(
         children: [
-          /// ================= BACKGROUND (FIXED) =================
           Image.asset(
             'assets/images/anggur.png',
             fit: BoxFit.cover,
@@ -23,7 +77,6 @@ class RegisterPage extends StatelessWidget {
             height: double.infinity,
           ),
 
-          /// ================= PANEL =================
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
@@ -35,12 +88,10 @@ class RegisterPage extends StatelessWidget {
                   top: Radius.circular(32),
                 ),
               ),
-
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    /// ================= HEADER =================
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -59,19 +110,31 @@ class RegisterPage extends StatelessWidget {
 
                     const SizedBox(height: 32),
 
-                    /// ================= INPUT =================
-                    _buildInput(context, hint: 'Enter your email'),
+                    _buildInput(
+                      context,
+                      hint: 'Enter your name',
+                      controller: nameController,
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    _buildInput(
+                      context,
+                      hint: 'Enter your email',
+                      controller: emailController,
+                    ),
+
                     const SizedBox(height: 16),
 
                     _buildInput(
                       context,
                       hint: 'Enter your password',
+                      controller: passwordController,
                       isPassword: true,
                     ),
 
                     const SizedBox(height: 16),
 
-                    /// ================= TERMS =================
                     Center(
                       child: TextButton(
                         onPressed: () {},
@@ -88,33 +151,29 @@ class RegisterPage extends StatelessWidget {
 
                     const SizedBox(height: 24),
 
-                    /// ================= BUTTON =================
                     SizedBox(
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const HomePage(),
-                            ),
-                          );
-                        },
+                        onPressed: isLoading ? null : register,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: colorScheme.primary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        child: const Text(
-                          'CREATE AN ACCOUNT',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
+                        child: isLoading
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
+                            : const Text(
+                                'CREATE AN ACCOUNT',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
                       ),
                     ),
                   ],
@@ -127,20 +186,21 @@ class RegisterPage extends StatelessWidget {
     );
   }
 
-  /// ================= INPUT =================
   Widget _buildInput(
     BuildContext context, {
     required String hint,
+    required TextEditingController controller,
     bool isPassword = false,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return TextFormField(
+      controller: controller,
       obscureText: isPassword,
       decoration: InputDecoration(
         hintText: hint,
         filled: true,
-        fillColor: colorScheme.surfaceVariant,
+        fillColor: colorScheme.surfaceContainerHighest,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 20,
           vertical: 18,

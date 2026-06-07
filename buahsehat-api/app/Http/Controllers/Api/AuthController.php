@@ -10,21 +10,24 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
     public function register(Request $request)
-    {
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email',
+        'password' => 'required|min:6',
     ]);
 
-    $token = $user->createToken('auth_token')->plainTextToken;
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => Hash::make($request->password),
+    ]);
 
     return response()->json([
         'message' => 'Register berhasil',
-        'token' => $token,
-        'user' => $user
-    ]);
-    }
+        'user' => $user,
+    ], 201);
+}
 
     public function login(Request $request)
 {
