@@ -3,6 +3,7 @@ import '../pages/product/product_detail_page.dart';
 import 'quantity_selector.dart';
 
 class ProductItem extends StatefulWidget {
+  final int id;
   final String name;
   final double price;
   final int qty;
@@ -11,6 +12,7 @@ class ProductItem extends StatefulWidget {
 
   const ProductItem({
     super.key,
+    required this.id,
     required this.name,
     required this.price,
     required this.qty,
@@ -46,6 +48,7 @@ class _ProductItemState extends State<ProductItem> {
           context,
           MaterialPageRoute(
             builder: (_) => ProductDetailPage(
+              id: widget.id,
               name: widget.name,
               price: widget.price,
               image: widget.image,

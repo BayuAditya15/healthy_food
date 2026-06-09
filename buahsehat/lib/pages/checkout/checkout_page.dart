@@ -1,5 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import '../payment/payment_page.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../services/cart_service.dart';
+import '../cart/cart_page.dart';
+import 'review_page.dart';
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -9,290 +16,232 @@ class CheckoutPage extends StatefulWidget {
 }
 
 class _CheckoutPageState extends State<CheckoutPage> {
-  bool saveAddress = false;
+  final _formKey = GlobalKey<FormState>();
 
-  final List<String> countries = [
-    "Indonesia",
-    "Malaysia",
-    "Singapore",
-    "Japan",
-    "USA",
-    "Germany",
-  ];
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _zipController = TextEditingController();
+  final _cityController = TextEditingController();
+  final _countryController = TextEditingController();
+  final _paymentDetailsController = TextEditingController();
 
-  String? selectedCountry = "USA";
+  String _paymentMethod = 'Cash on Delivery';
+  bool _isSubmitting = false;
+
+  static const String _baseUrl = 'http://127.0.0.1:8000/api';
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
+  void initState() {
+    super.initState();
+    _prefillFromCachedProfile();
+  }
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              // ================= HEADER =================
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Icon(
-                      Icons.arrow_back,
-                      color: colorScheme.onBackground,
-                    ),
-                  ),
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        "Checkout",
-                        style: textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onBackground,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 24),
-                ],
+  Future<void> _prefillFromCachedProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString('name') ?? '';
+    final email = prefs.getString('email') ?? '';
+
+    _nameController.text = name;
+    _emailController.text = email;
+  }
+
+  Future<void> _submitOrder() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token') ?? '';
+
+    final items = CartService.items.value
+        .map(
+          (e) => {
+            'product_id': e.productId,
+            'name': e.name,
+            'price': e.price,
+            'quantity': e.quantity,
+          },
+        )
+        .toList();
+
+    if (items.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Keranjang kosong')));
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    final payload = {
+      'items': items,
+      'shipping_name': _nameController.text,
+      'shipping_email': _emailController.text,
+      'shipping_phone': _phoneController.text,
+      'shipping_zip': _zipController.text,
+      'shipping_city': _cityController.text,
+      'shipping_country': _countryController.text,
+      'payment_method': _paymentMethod,
+      'payment_details': _paymentDetailsController.text,
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/orders'),
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          if (token.isNotEmpty) 'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(payload),
+      );
+
+      if (response.statusCode == 201) {
+        await CartService.clear();
+
+        if (!mounted) return;
+
+        final decoded = jsonDecode(response.body);
+        final orderId = decoded['order_id'];
+
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Order berhasil'),
+            content: Text('Order #$orderId berhasil dibuat.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Tutup'),
               ),
-
-              const SizedBox(height: 25),
-
-              // ================= STEP INDICATOR =================
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      circle(true, colorScheme),
-                      const SizedBox(width: 8),
-                      Expanded(child: line(true, colorScheme)),
-                      const SizedBox(width: 8),
-                      circle(false, colorScheme),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Text(
-                        "Shipping Address",
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onBackground,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        "Payment Method",
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: theme.hintColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 25),
-
-              // ================= FORM =================
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      input(context, "Full Name", "Ujang Kosim"),
-                      input(context, "Email Address", "info@example.com"),
-                      input(context, "Phone", "Enter your phone number"),
-
-                      Row(
-                        children: [
-                          Expanded(child: input(context, "Zip Code", "Enter here")),
-                          const SizedBox(width: 12),
-                          Expanded(child: input(context, "City", "Enter here")),
-                        ],
-                      ),
-
-                      // ================= DROPDOWN =================
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 18),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Country",
-                                style: textTheme.bodyMedium?.copyWith(
-                                  color: colorScheme.onBackground,
-                                )),
-                            const SizedBox(height: 6),
-
-                            DropdownButtonFormField<String>(
-                              value: countries.contains(selectedCountry)
-                                  ? selectedCountry
-                                  : null,
-
-                              dropdownColor: theme.cardColor,
-
-                              decoration: InputDecoration(
-                                filled: true,
-                                fillColor: theme.cardColor,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 14,
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                  borderSide: BorderSide.none,
-                                ),
-                              ),
-
-                              items: countries.map((country) {
-                                return DropdownMenuItem(
-                                  value: country,
-                                  child: Text(
-                                    country,
-                                    style: TextStyle(
-                                      color: colorScheme.onSurface,
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedCountry = value;
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: saveAddress,
-                            activeColor: colorScheme.primary,
-                            onChanged: (val) {
-                              setState(() {
-                                saveAddress = val!;
-                              });
-                            },
-                          ),
-                          Text(
-                            "Save shipping address",
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onBackground,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              // ================= BUTTON =================
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.primary,
-                    foregroundColor: colorScheme.onPrimary,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ReviewPage(purchasedItems: items),
                     ),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const PaymentPage()),
-                    );
-                  },
-                  child: const Text("NEXT", style: TextStyle(fontSize: 16)),
-                ),
+                  );
+                },
+                child: const Text('Submit Review'),
               ),
             ],
           ),
-        ),
-      ),
-    );
+        );
+
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const CartPage()),
+          );
+        }
+      } else {
+        final decoded = jsonDecode(response.body);
+        final msg =
+            decoded['error'] ?? decoded['message'] ?? 'Gagal membuat order';
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg.toString())));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 
-  // ================= INPUT =================
-  Widget input(BuildContext context, String label, String hint) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label,
-              style: TextStyle(color: colorScheme.onBackground)),
-          const SizedBox(height: 6),
-          TextField(
-            style: TextStyle(color: colorScheme.onSurface),
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: TextStyle(color: theme.hintColor),
-              filled: true,
-              fillColor: theme.cardColor,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 14,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide.none,
-              ),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Checkout')),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Shipping Information',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(labelText: 'Name'),
+                  validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                ),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(labelText: 'Email'),
+                  validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                ),
+                TextFormField(
+                  controller: _phoneController,
+                  decoration: const InputDecoration(labelText: 'Phone'),
+                  validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                ),
+                TextFormField(
+                  controller: _zipController,
+                  decoration: const InputDecoration(labelText: 'Zip Code'),
+                ),
+                TextFormField(
+                  controller: _cityController,
+                  decoration: const InputDecoration(labelText: 'City'),
+                ),
+                TextFormField(
+                  controller: _countryController,
+                  decoration: const InputDecoration(labelText: 'Country'),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Payment Method',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  value: _paymentMethod,
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'Cash on Delivery',
+                      child: Text('Cash on Delivery'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Bank Transfer',
+                      child: Text('Bank Transfer'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Manual Card',
+                      child: Text('Manual Card (no gateway)'),
+                    ),
+                  ],
+                  onChanged: (v) =>
+                      setState(() => _paymentMethod = v ?? 'Cash on Delivery'),
+                ),
+                TextFormField(
+                  controller: _paymentDetailsController,
+                  decoration: const InputDecoration(
+                    labelText: 'Payment details (optional)',
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isSubmitting ? null : _submitOrder,
+                    child: _isSubmitting
+                        ? const CircularProgressIndicator()
+                        : const Text('Place Order'),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  // ================= STEP CIRCLE =================
-  Widget circle(bool active, ColorScheme colorScheme) {
-    return Container(
-      width: 22,
-      height: 22,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: active
-              ? colorScheme.primary
-              : colorScheme.outline,
-          width: 2,
         ),
       ),
-      child: active
-          ? Container(
-              margin: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: colorScheme.primary,
-                shape: BoxShape.circle,
-              ),
-            )
-          : null,
-    );
-  }
-
-  // ================= STEP LINE =================
-  Widget line(bool active, ColorScheme colorScheme) {
-    return Container(
-      height: 2,
-      color: active
-          ? colorScheme.primary
-          : colorScheme.outline,
     );
   }
 }

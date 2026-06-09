@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../widgets/product_item.dart';
-import '../checkout/checkout_page.dart';
 import '../../widgets/bottom_nav.dart';
 import '../category/categories_page.dart';
 import '../../pages/wishlist/wishlist_page.dart';
 import '../../pages/profile/profile_page.dart';
 import '../../pages/home/home_page.dart';
+import '../../services/cart_service.dart';
+import '../../models/cart_item_model.dart';
 
 class CartPage extends StatelessWidget {
   const CartPage({super.key});
@@ -30,55 +31,38 @@ class CartPage extends StatelessWidget {
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
 
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const CheckoutPage()),
-                      );
-                    },
-                    child: const Text(
-                      "Checkout",
-                      style: TextStyle(
-                        color: Colors.green,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
+                  const SizedBox.shrink(),
                 ],
               ),
             ),
 
             /// ================= LIST =================
             Expanded(
-              child: ListView(
+              child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                children: const [
-                  ProductItem(
-                    name: "Avocado",
-                    price: 7.2,
-                    qty: 4,
-                    image: 'assets/images/alpukat.png',
-                    description:
-                        "            Avocad premium ini dipanen pada tingkat kematangan yang optimal untuk memastikan tekstur daging buah yang lembut, pulen, dan cita rasa manis yang legit di lidah. Sebagai salah satu sumber kalium dan energi instan terbaik, pisang ini menjadi pilihan favorit bagi mereka yang memiliki gaya hidup aktif karena kepraktisannya untuk dikonsumsi kapan saja dan di mana saja. Selain lezat dinikmati secara langsung, pisang ini juga sangat ideal diolah menjadi berbagai menu sarapan bernutrisi seperti smoothie, oatmeal, hingga bahan dasar kue yang memberikan aroma harum alami.",
-                  ),
-                  ProductItem(
-                    name: "Broccoli",
-                    price: 6.3,
-                    qty: 1,
-                    image: 'assets/images/brokoli.png',
-                    description:
-                        "Brokoli kaya nutrisi, cocok untuk makanan sehat.",
-                  ),
-                  ProductItem(
-                    name: "Grapes",
-                    price: 5.7,
-                    qty: 2,
-                    image: 'assets/images/anggur.png',
-                    description: "Anggur manis dan juicy, kaya antioksidan.",
-                  ),
-                ],
+                child: ValueListenableBuilder<List<CartItemModel>>(
+                  valueListenable: CartService.items,
+                  builder: (context, items, _) {
+                    if (items.isEmpty) {
+                      return Center(child: Text('Keranjang kosong'));
+                    }
+
+                    return ListView.builder(
+                      itemCount: items.length,
+                      itemBuilder: (context, index) {
+                        final item = items[index];
+                        return ProductItem(
+                          id: item.productId,
+                          name: item.name,
+                          price: item.price,
+                          qty: item.quantity,
+                          image: item.image,
+                          description: item.description,
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
             ),
           ],

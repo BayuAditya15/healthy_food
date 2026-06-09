@@ -37,11 +37,14 @@ class _LoginPageState extends State<LoginPage> {
       final data = jsonDecode(response.body);
       print(data);
 
-
       if (response.statusCode == 200) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', data['token']);
         await prefs.setString('name', data['user']['name']);
+        await prefs.setString(
+          'email',
+          data['user']['email'] ?? emailController.text,
+        );
 
         if (mounted) {
           Navigator.pushReplacement(

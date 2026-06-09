@@ -82,6 +82,7 @@ class _TrendingState extends State<Trending> {
                 itemBuilder: (context, i) {
                   final p = products[i];
                   return ProductCard(
+                    id: p.id,
                     title: p.name,
                     price: 'Rp ${p.price}',
                     image: p.image ?? '',

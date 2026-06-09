@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../pages/product/product_detail_page.dart';
+import '../models/wishlist_item_model.dart';
+import '../services/wishlist_service.dart';
 
 class ProductCard extends StatefulWidget {
+  final int id;
   final String title;
   final String price;
   final String image;
 
   const ProductCard({
     super.key,
+    required this.id,
     required this.title,
     required this.price,
     required this.image,
@@ -19,6 +23,20 @@ class ProductCard extends StatefulWidget {
 
 class _ProductCardState extends State<ProductCard> {
   bool isFavorite = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _syncFavoriteState();
+  }
+
+  Future<void> _syncFavoriteState() async {
+    final favorite = await WishlistService.isInWishlistById(widget.id);
+    if (!mounted) return;
+    setState(() {
+      isFavorite = favorite;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +58,7 @@ class _ProductCardState extends State<ProductCard> {
               context,
               MaterialPageRoute(
                 builder: (context) => ProductDetailPage(
+                  id: widget.id,
                   name: widget.title,
                   price: parsedPrice,
                   image: widget.image,
@@ -87,7 +106,23 @@ class _ProductCardState extends State<ProductCard> {
                   top: 10,
                   left: 10,
                   child: GestureDetector(
-                    onTap: () {
+                    onTap: () async {
+                      await WishlistService.toggleItem(
+                        WishlistItemModel(
+                          productId: widget.id,
+                          name: widget.title,
+                          price:
+                              double.tryParse(
+                                widget.price.replaceAll(RegExp(r'[^0-9.]'), ''),
+                              ) ??
+                              0.0,
+                          image: widget.image,
+                          description: '',
+                          category: '',
+                        ),
+                      );
+
+                      if (!mounted) return;
                       setState(() {
                         isFavorite = !isFavorite;
                       });

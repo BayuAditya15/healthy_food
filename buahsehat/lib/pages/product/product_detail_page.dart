@@ -4,8 +4,13 @@ import '../../widgets/rating_section.dart';
 import '../../widgets/tab_section.dart';
 import '../../widgets/review_item.dart';
 import '../../pages/cart/cart_page.dart';
+import '../../models/cart_item_model.dart';
+import '../../services/cart_service.dart';
+import '../../models/wishlist_item_model.dart';
+import '../../services/wishlist_service.dart';
 
 class ProductDetailPage extends StatefulWidget {
+  final int id;
   final String name;
   final double price;
   final String image;
@@ -14,6 +19,7 @@ class ProductDetailPage extends StatefulWidget {
 
   const ProductDetailPage({
     super.key,
+    required this.id,
     required this.name,
     required this.price,
     required this.image,
@@ -28,6 +34,19 @@ class ProductDetailPage extends StatefulWidget {
 class _ProductDetailPageState extends State<ProductDetailPage> {
   int qty = 1;
   int selectedTab = 0;
+  bool isWishlisted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _syncWishlist();
+  }
+
+  Future<void> _syncWishlist() async {
+    final v = await WishlistService.isInWishlistById(widget.id);
+    if (!mounted) return;
+    setState(() => isWishlisted = v);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +83,38 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   ),
                 ),
 
-                Positioned(top: 40, right: 16, child: circleIcon(Icons.share)),
+                Positioned(
+                  top: 40,
+                  right: 16,
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () {},
+                        child: circleIcon(Icons.share),
+                      ),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () async {
+                          // toggle wishlist
+                          final model = WishlistItemModel(
+                            productId: widget.id,
+                            name: widget.name,
+                            price: widget.price,
+                            image: widget.image,
+                            description: widget.description,
+                            category: widget.category,
+                          );
+                          await WishlistService.toggleItem(model);
+                          if (!mounted) return;
+                          setState(() => isWishlisted = !isWishlisted);
+                        },
+                        child: circleIcon(
+                          isWishlisted ? Icons.favorite : Icons.favorite_border,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
 
@@ -201,9 +251,26 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 : Colors.pink,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(
-                            Icons.favorite,
-                            color: Colors.white,
+                          child: GestureDetector(
+                            onTap: () async {
+                              final model = WishlistItemModel(
+                                productId: widget.id,
+                                name: widget.name,
+                                price: widget.price,
+                                image: widget.image,
+                                description: widget.description,
+                                category: widget.category,
+                              );
+                              await WishlistService.toggleItem(model);
+                              if (!mounted) return;
+                              setState(() => isWishlisted = !isWishlisted);
+                            },
+                            child: Icon(
+                              isWishlisted
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
 
@@ -218,12 +285,20 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const CartPage(),
-                                ),
+                            onPressed: () async {
+                              final item = CartItemModel(
+                                productId: widget.id,
+                                name: widget.name,
+                                price: widget.price,
+                                quantity: qty,
+                                image: widget.image,
+                                description: widget.description,
+                                category: widget.category,
+                              );
+                              await CartService.addItem(item);
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Added to cart')),
                               );
                             },
                             child: Center(
