@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../pages/product/product_detail_page.dart';
 import 'quantity_selector.dart';
+import '../services/cart_service.dart';
 
 class ProductItem extends StatefulWidget {
   final int id;
@@ -103,11 +104,22 @@ class _ProductItemState extends State<ProductItem> {
             /// ================= QTY =================
             QuantitySelector(
               qty: qty,
-              onChanged: (val) {
-                if (val < 1) return; // guard biar nggak minus
+             onChanged: (val) async {
+                if (val < 1) return;
+
                 setState(() {
                   qty = val;
                 });
+
+                final items = CartService.items.value;
+
+                final index = items.indexWhere(
+                  (item) => item.productId == widget.id,
+                );
+
+                if (index != -1) {
+                  await CartService.updateQuantity(index, val);
+                }
               },
             ),
           ],

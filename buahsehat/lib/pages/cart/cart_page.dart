@@ -3,10 +3,10 @@ import '../../widgets/product_item.dart';
 import '../../widgets/bottom_nav.dart';
 import '../category/categories_page.dart';
 import '../../pages/wishlist/wishlist_page.dart';
-import '../../pages/profile/profile_page.dart';
 import '../../pages/home/home_page.dart';
 import '../../services/cart_service.dart';
 import '../../models/cart_item_model.dart';
+import '../checkout/checkout_page.dart';
 
 class CartPage extends StatelessWidget {
   const CartPage({super.key});
@@ -25,13 +25,11 @@ class CartPage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
+                children: const [
+                  Text(
                     "Shopping Cart",
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
-
-                  const SizedBox.shrink(),
                 ],
               ),
             ),
@@ -44,13 +42,14 @@ class CartPage extends StatelessWidget {
                   valueListenable: CartService.items,
                   builder: (context, items, _) {
                     if (items.isEmpty) {
-                      return Center(child: Text('Keranjang kosong'));
+                      return const Center(child: Text('Keranjang kosong'));
                     }
 
                     return ListView.builder(
                       itemCount: items.length,
                       itemBuilder: (context, index) {
                         final item = items[index];
+
                         return ProductItem(
                           id: item.productId,
                           name: item.name,
@@ -69,37 +68,56 @@ class CartPage extends StatelessWidget {
         ),
       ),
 
-      /// ================= BOTTOM NAV =================
-      bottomNavigationBar: BottomNav(
-        currentIndex: 2,
-        onTap: (index) {
-          if (index == 4) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const CategoriesPage()),
-            );
-          } else if (index == 2) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const CartPage()),
-            );
-          } else if (index == 3) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const WishlistPage()),
-            );
-          } else if (index == 4) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const ProfilePage()),
-            );
-          } else {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const HomePage()),
-            );
-          }
-        },
+      /// ================= FOOTER =================
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          /// CHECKOUT BUTTON
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const CheckoutPage()),
+                  );
+                },
+                child: const Text(
+                  'CHECKOUT',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          ),
+
+          /// BOTTOM NAV
+          BottomNav(
+            currentIndex: 2,
+            onTap: (index) {
+              if (index == 0) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HomePage()),
+                );
+              } else if (index == 1) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CategoriesPage()),
+                );
+              } else if (index == 2) {
+                return;
+              } else if (index == 3) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const WishlistPage()),
+                );
+              }
+            },
+          ),
+        ],
       ),
     );
   }

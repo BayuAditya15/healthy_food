@@ -1,9 +1,9 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Pastikan path import ini sesuai dengan struktur folder project Anda
 import '../../services/cart_service.dart';
 import '../cart/cart_page.dart';
 import 'review_page.dart';
@@ -18,16 +18,17 @@ class CheckoutPage extends StatefulWidget {
 class _CheckoutPageState extends State<CheckoutPage> {
   final _formKey = GlobalKey<FormState>();
 
+  // Controllers untuk menangkap input user
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _zipController = TextEditingController();
   final _cityController = TextEditingController();
-  final _countryController = TextEditingController();
   final _paymentDetailsController = TextEditingController();
 
-  String _paymentMethod = 'Cash on Delivery';
+  String? selectedCountry = "Indonesia";
   bool _isSubmitting = false;
+  String _paymentMethod = 'Cash on Delivery';
 
   static const String _baseUrl = 'http://127.0.0.1:8000/api';
 
@@ -39,11 +40,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   Future<void> _prefillFromCachedProfile() async {
     final prefs = await SharedPreferences.getInstance();
-    final name = prefs.getString('name') ?? '';
-    final email = prefs.getString('email') ?? '';
-
-    _nameController.text = name;
-    _emailController.text = email;
+    setState(() {
+      _nameController.text = prefs.getString('name') ?? '';
+      _emailController.text = prefs.getString('email') ?? '';
+    });
   }
 
   Future<void> _submitOrder() async {
@@ -51,7 +51,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token') ?? '';
-
     final items = CartService.items.value
         .map(
           (e) => {
@@ -79,7 +78,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       'shipping_phone': _phoneController.text,
       'shipping_zip': _zipController.text,
       'shipping_city': _cityController.text,
-      'shipping_country': _countryController.text,
+      'shipping_country': selectedCountry,
       'payment_method': _paymentMethod,
       'payment_details': _paymentDetailsController.text,
     };
@@ -97,51 +96,18 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
       if (response.statusCode == 201) {
         await CartService.clear();
-
         if (!mounted) return;
 
-        final decoded = jsonDecode(response.body);
-        final orderId = decoded['order_id'];
-
-        await showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Order berhasil'),
-            content: Text('Order #$orderId berhasil dibuat.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Tutup'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ReviewPage(purchasedItems: items),
-                    ),
-                  );
-                },
-                child: const Text('Submit Review'),
-              ),
-            ],
-          ),
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => ReviewPage(purchasedItems: items)),
         );
-
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const CartPage()),
-          );
-        }
       } else {
-        final decoded = jsonDecode(response.body);
-        final msg =
-            decoded['error'] ?? decoded['message'] ?? 'Gagal membuat order';
+        final error =
+            jsonDecode(response.body)['message'] ?? 'Gagal memproses order';
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(msg.toString())));
+        ).showSnackBar(SnackBar(content: Text(error)));
       }
     } catch (e) {
       ScaffoldMessenger.of(
@@ -155,92 +121,203 @@ class _CheckoutPageState extends State<CheckoutPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Checkout')),
+      backgroundColor: Colors.grey[100],
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: Padding(
           padding: const EdgeInsets.all(16),
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Shipping Information',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'Name'),
-                  validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-                ),
-                TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-                ),
-                TextFormField(
-                  controller: _phoneController,
-                  decoration: const InputDecoration(labelText: 'Phone'),
-                  validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-                ),
-                TextFormField(
-                  controller: _zipController,
-                  decoration: const InputDecoration(labelText: 'Zip Code'),
-                ),
-                TextFormField(
-                  controller: _cityController,
-                  decoration: const InputDecoration(labelText: 'City'),
-                ),
-                TextFormField(
-                  controller: _countryController,
-                  decoration: const InputDecoration(labelText: 'Country'),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Payment Method',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  value: _paymentMethod,
-                  items: const [
-                    DropdownMenuItem(
-                      value: 'Cash on Delivery',
-                      child: Text('Cash on Delivery'),
+                // 🔙 HEADER
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: const Icon(Icons.arrow_back),
                     ),
-                    DropdownMenuItem(
-                      value: 'Bank Transfer',
-                      child: Text('Bank Transfer'),
+                    const Expanded(
+                      child: Center(
+                        child: Text(
+                          "Checkout",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                     ),
-                    DropdownMenuItem(
-                      value: 'Manual Card',
-                      child: Text('Manual Card (no gateway)'),
-                    ),
+                    const SizedBox(width: 24),
                   ],
-                  onChanged: (v) =>
-                      setState(() => _paymentMethod = v ?? 'Cash on Delivery'),
                 ),
-                TextFormField(
-                  controller: _paymentDetailsController,
-                  decoration: const InputDecoration(
-                    labelText: 'Payment details (optional)',
+                const SizedBox(height: 25),
+
+                // 🔥 FORM
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        input("Full Name", "Ujang Kosim", _nameController),
+                        input(
+                          "Email Address",
+                          "info@example.com",
+                          _emailController,
+                        ),
+                        input(
+                          "Phone",
+                          "Enter your phone number",
+                          _phoneController,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: input(
+                                "Zip Code",
+                                "Enter here",
+                                _zipController,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: input(
+                                "City",
+                                "Enter here",
+                                _cityController,
+                              ),
+                            ),
+                          ],
+                        ),
+                        _buildDropdown(),
+                        _buildPaymentDropdown(),
+                        input(
+                          "Payment Details",
+                          "Optional",
+                          _paymentDetailsController,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(height: 24),
+
+                // 🔥 BUTTON
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
                     onPressed: _isSubmitting ? null : _submitOrder,
                     child: _isSubmitting
-                        ? const CircularProgressIndicator()
-                        : const Text('Place Order'),
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text(
+                            "PLACE ORDER",
+                            style: TextStyle(fontSize: 16),
+                          ),
                   ),
                 ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // Widget Helper Input
+  Widget input(String label, String hint, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label),
+          const SizedBox(height: 6),
+          TextFormField(
+            controller: controller,
+            validator: (val) => val!.isEmpty ? 'Field ini wajib diisi' : null,
+            decoration: InputDecoration(
+              hintText: hint,
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 14,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDropdown() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text("Country"),
+          const SizedBox(height: 6),
+          DropdownButtonFormField<String>(
+            value: selectedCountry,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide.none,
+              ),
+            ),
+            items: [
+              "Indonesia",
+              "Malaysia",
+              "Singapore",
+              "Japan",
+              "USA",
+              "Germany",
+            ].map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+            onChanged: (v) => setState(() => selectedCountry = v),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentDropdown() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text("Payment Method"),
+          const SizedBox(height: 6),
+          DropdownButtonFormField<String>(
+            value: _paymentMethod,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide.none,
+              ),
+            ),
+            items: [
+              'Cash on Delivery',
+              'Bank Transfer',
+              'Manual Card',
+            ].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
+            onChanged: (v) => setState(() => _paymentMethod = v!),
+          ),
+        ],
       ),
     );
   }
