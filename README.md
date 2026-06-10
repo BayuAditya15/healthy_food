@@ -416,9 +416,13 @@ flutter run
 
 ## Kontributor
 
-| Nama | Peran |
+| NPM | Nama |
 |---|---|
-| *(Nama Anda)* | Flutter Developer & Laravel Developer |
+| 5230311003| Rahmad Dhanu Widi Anggoro |
+| 5230311016| Sena Nugraha |
+| 5230311042| Agis Maulana |
+| 5230311047| Bayu Dwi Aditya Saputra |
+| 5230311055| Muhammad Fadhil Allamsyah |
 
 ---
 
