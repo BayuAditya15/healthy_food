@@ -21,7 +21,6 @@ class _CategoryPageState extends State<CategoryPage> {
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
     final int categoryId = args?['id'] ?? 1;
-    // Panggil service di sini agar tidak terpanggil ulang saat build()
     productsFuture = ProductService.getProductsByCategory(categoryId);
   }
 

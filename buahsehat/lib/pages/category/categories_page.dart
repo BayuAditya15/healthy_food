@@ -1,39 +1,60 @@
 import 'package:flutter/material.dart';
+import '../../models/category_model.dart';
+import '../../services/category_service.dart';
 import 'category_page.dart';
 
-class CategoriesPage extends StatelessWidget {
+class CategoriesPage extends StatefulWidget {
   const CategoriesPage({super.key});
+
+  @override
+  State<CategoriesPage> createState() => _CategoriesPageState();
+}
+
+class _CategoriesPageState extends State<CategoriesPage> {
+  late Future<List<CategoryModel>> categoriesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    categoriesFuture = CategoryService.getCategories();
+  }
+
+  IconData getCategoryIcon(String name) {
+    switch (name.toLowerCase()) {
+      case 'fruits':
+        return Icons.grain;
+      case 'vegetables':
+        return Icons.eco;
+      case 'mushroom':
+        return Icons.emoji_nature;
+      case 'dairy':
+        return Icons.local_drink;
+      case 'oats':
+        return Icons.rice_bowl;
+      case 'bread':
+        return Icons.bakery_dining;
+      default:
+        return Icons.category;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
-    final List<Map<String, dynamic>> categories = [
-      {'id': 1, 'name': 'Fruits', 'items': '87 Items', 'icon': Icons.grain},
-      {'id': 2, 'name': 'Vegetables', 'items': '24 Items', 'icon': Icons.eco},
-      {'id': 3, 'name': 'Mushroom', 'items': '43 Items', 'icon': Icons.emoji_nature},
-      {'id': 4, 'name': 'Dairy', 'items': '22 Items', 'icon': Icons.local_drink},
-      {'id': 5, 'name': 'Oats', 'items': '64 Items', 'icon': Icons.rice_bowl},        {'id': 6, 'name': 'Bread', 'items': '43 Items', 'icon': Icons.bakery_dining},
-    ];
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
 
-      // ================= APPBAR =================
       appBar: AppBar(
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
-
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: colorScheme.onBackground),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
-
         centerTitle: true,
-
         title: Text(
           'Categories',
           style: textTheme.titleLarge?.copyWith(
@@ -43,91 +64,99 @@ class CategoriesPage extends StatelessWidget {
         ),
       ),
 
-      // ================= BODY =================
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          final item = categories[index];
+      body: FutureBuilder<List<CategoryModel>>(
+        future: categoriesFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-          return GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const CategoryPage(),
-                  settings: RouteSettings(
-                    arguments: {'id': item['id'], 'name': item['name'], 'items': item['items']},
-                  ),
-                ),
-              );
-            },
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              height: 90,
+          if (snapshot.hasError) {
+            return Center(child: Text('Gagal memuat kategori'));
+          }
 
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
+          final categories = snapshot.data ?? [];
 
-                /// 🔥 GRADIENT DINAMIS (ikut primary color)
-                gradient: LinearGradient(
-                  colors: [
-                    colorScheme.primary,
-                    colorScheme.primary.withOpacity(0.7),
-                  ],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
+          if (categories.isEmpty) {
+            return const Center(child: Text('Belum ada kategori'));
+          }
 
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(
-                      theme.brightness == Brightness.dark ? 0.3 : 0.1,
-                    ),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: categories.length,
+            itemBuilder: (context, index) {
+              final item = categories[index];
 
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  /// ================= TEXT =================
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item['name'],
-                        style: textTheme.titleMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const CategoryPage(),
+                      settings: RouteSettings(
+                        arguments: {'id': item.id, 'name': item.name},
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item['items'],
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: Colors.white70,
+                    ),
+                  );
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  height: 90,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    gradient: LinearGradient(
+                      colors: [
+                        colorScheme.primary,
+                        colorScheme.primary.withOpacity(0.7),
+                      ],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(
+                          theme.brightness == Brightness.dark ? 0.3 : 0.1,
+                        ),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.name,
+                            style: textTheme.titleMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          getCategoryIcon(item.name),
+                          color: Colors.white,
+                          size: 26,
                         ),
                       ),
                     ],
                   ),
-
-                  /// ================= ICON =================
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(item['icon'], color: Colors.white, size: 26),
-                  ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           );
         },
       ),

@@ -22,3 +22,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('orders', OrderController::class);
     Route::post('/reviews', [ReviewController::class, 'store']);
 });
+
+Route::get(
+    '/products/{id}/reviews',
+    [ReviewController::class, 'byProduct']
+);
+
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::post(
+        '/reviews',
+        [ReviewController::class, 'store']
+    );
+
+});

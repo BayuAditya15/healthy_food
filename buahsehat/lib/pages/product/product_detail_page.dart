@@ -8,6 +8,9 @@ import '../../models/cart_item_model.dart';
 import '../../services/cart_service.dart';
 import '../../models/wishlist_item_model.dart';
 import '../../services/wishlist_service.dart';
+import '../../models/review_model.dart';
+import '../../services/review_service.dart';
+
 
 class ProductDetailPage extends StatefulWidget {
   final int id;
@@ -29,6 +32,7 @@ class ProductDetailPage extends StatefulWidget {
 
   @override
   State<ProductDetailPage> createState() => _ProductDetailPageState();
+  
 }
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
@@ -36,10 +40,18 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   int selectedTab = 0;
   bool isWishlisted = false;
 
+  late Future<List<ReviewModel>> reviewsFuture;
+
   @override
+
   void initState() {
     super.initState();
     _syncWishlist();
+
+    reviewsFuture = ReviewService.getReviews(
+      widget.id,
+    );
+
   }
 
   Future<void> _syncWishlist() async {
@@ -208,24 +220,40 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 ),
                               ),
 
-                            if (selectedTab == 1) ...[
-                              const ReviewItem(
-                                name: "James Logan",
-                                date: "27 August 2020",
-                                comment:
-                                    "mantap banget, rasanya enak dan segar. Recommended!",
-                                rating: 4,
-                                image: 'assets/images/rv1.png',
+                            if (selectedTab == 1)
+                              FutureBuilder<List<ReviewModel>>(
+                                future: reviewsFuture,
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+
+                                  if (snapshot.hasError) {
+                                    return const Text('Gagal memuat review');
+                                  }
+
+                                  final reviews = snapshot.data ?? [];
+
+                                  if (reviews.isEmpty) {
+                                    return const Text('Belum ada review');
+                                  }
+
+                                  return Column(
+                                    children: reviews.map((review) {
+                                      return ReviewItem(
+                                        name: review.userName,
+                                        date: '',
+                                        comment: review.comment,
+                                        rating: review.rating,
+                                        image: 'assets/images/avatar.png',
+                                      );
+                                    }).toList(),
+                                  );
+                                },
                               ),
-                              const ReviewItem(
-                                name: "Leo Tucker",
-                                date: "15 June 2020",
-                                comment:
-                                    "ga bosen dimakan, apalagi pas panas. Seger banget!",
-                                rating: 5,
-                                image: 'assets/images/rv2.png',
-                              ),
-                            ],
 
                             if (selectedTab == 2)
                               const Text(

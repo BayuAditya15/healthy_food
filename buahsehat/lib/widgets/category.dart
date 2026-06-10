@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/category_model.dart';
 import '../services/category_service.dart';
-import '../pages/category/category_page.dart';
 import '../pages/category/categories_page.dart';
 
 class Category extends StatefulWidget {
