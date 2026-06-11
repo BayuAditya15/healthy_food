@@ -404,14 +404,18 @@ flutter run
 
 > Tambahkan screenshot aplikasi di sini.
 
-| Landing Page | Home | Category | Produk Detail | Wishlist | Profile |
-|-------------|------|----------|--------------|----------|---------|
-| <img width="167" height="356" alt="image" src="https://github.com/user-attachments/assets/5719aba7-c18d-41aa-aa48-ecca254415cf" />
- | <img width="295" height="640" alt="Screenshot 2026-06-09 182527" src="https://github.com/user-attachments/assets/6493abe5-b754-41a9-a2bb-d5f50673ee4e" />
- | <img width="295" height="636" alt="Screenshot 2026-06-09 182734" src="https://github.com/user-attachments/assets/dc585f28-0db5-47b3-9103-df747d8fa648" />
- |<img width="300" height="645" alt="Screenshot 2026-06-09 182837" src="https://github.com/user-attachments/assets/c64a936e-effb-40d6-986c-bb56dfe2c18f" />
- | <img width="298" height="634" alt="Screenshot 2026-06-09 182922" src="https://github.com/user-attachments/assets/a7b48fd5-2e7e-44e6-a091-fd07f45d072c" />
- | <img width="306" height="642" alt="Screenshot 2026-06-09 183329" src="https://github.com/user-attachments/assets/5a9b4fb7-2514-4a64-835e-7bd8c3708ac4" />
+| Landing Page | Home | Produk Detail |
+|---|---|---|
+| <img width="304" height="640" alt="Screenshot 2026-06-09 182233" src="https://github.com/user-attachments/assets/2953dc1e-2019-46be-9c75-0a6d7525e8ed" />
+ | <img width="295" height="640" alt="Screenshot 2026-06-09 182527" src="https://github.com/user-attachments/assets/88fd81c4-b42d-4601-97e7-e9cf6aedab98" />
+ | <img width="300" height="645" alt="Screenshot 2026-06-09 182837" src="https://github.com/user-attachments/assets/afd1617c-0c75-45f2-9fa9-e00ea5a8c48a" />
+ |
+
+| Category | Wishlist | Profil |
+|---|---|---|
+| <img width="295" height="636" alt="Screenshot 2026-06-09 182734" src="https://github.com/user-attachments/assets/d5ff867d-056c-4bc1-8f1d-57b38e77885c" />
+ | <img width="298" height="634" alt="Screenshot 2026-06-09 182922" src="https://github.com/user-attachments/assets/54c8f4ef-6e39-44b5-b14d-61e3da6a837a" />
+ | <img width="306" height="642" alt="Screenshot 2026-06-09 183329" src="https://github.com/user-attachments/assets/4dde0990-665b-4527-b973-e118dbd3d164" />
  |
 
 | Keranjang | Checkout | Dashboard Admin |
