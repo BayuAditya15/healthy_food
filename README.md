@@ -406,7 +406,8 @@ flutter run
 
 | Landing Page | Home | Produk Detail |
 |---|---|---|
-| *(screenshot)* | *(screenshot)* | *(screenshot)* |
+| <img width="167" height="356" alt="image" src="https://github.com/user-attachments/assets/5719aba7-c18d-41aa-aa48-ecca254415cf" />
+ | *(screenshot)* | *(screenshot)* |
 
 | Keranjang | Checkout | Dashboard Admin |
 |---|---|---|
