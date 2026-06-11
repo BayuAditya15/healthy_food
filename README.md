@@ -406,10 +406,7 @@ flutter run
 
 | Landing Page | Home | Produk Detail |
 |---|---|---|
-| <img width="304" height="640" alt="Screenshot 2026-06-09 182233" src="https://github.com/user-attachments/assets/2953dc1e-2019-46be-9c75-0a6d7525e8ed" />
- | <img width="295" height="640" alt="Screenshot 2026-06-09 182527" src="https://github.com/user-attachments/assets/88fd81c4-b42d-4601-97e7-e9cf6aedab98" />
- | <img width="300" height="645" alt="Screenshot 2026-06-09 182837" src="https://github.com/user-attachments/assets/afd1617c-0c75-45f2-9fa9-e00ea5a8c48a" />
- |
+| <img width="304" height="640" alt="Screenshot 2026-06-09 182233" src="https://github.com/user-attachments/assets/2953dc1e-2019-46be-9c75-0a6d7525e8ed" /> | <img width="295" height="640" alt="Screenshot 2026-06-09 182527" src="https://github.com/user-attachments/assets/88fd81c4-b42d-4601-97e7-e9cf6aedab98" /> | <img width="300" height="645" alt="Screenshot 2026-06-09 182837" src="https://github.com/user-attachments/assets/afd1617c-0c75-45f2-9fa9-e00ea5a8c48a" /> |
 
 | Category | Wishlist | Profil |
 |---|---|---|
