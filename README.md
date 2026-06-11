@@ -404,14 +404,22 @@ flutter run
 
 > Tambahkan screenshot aplikasi di sini.
 
-| Landing Page | Home | Produk Detail |
+| Landing Page | Home | category | Produk Detail | Wishlist | Profile |
 |---|---|---|
 | <img width="167" height="356" alt="image" src="https://github.com/user-attachments/assets/5719aba7-c18d-41aa-aa48-ecca254415cf" />
- | *(screenshot)* | *(screenshot)* |
+ | <img width="295" height="640" alt="Screenshot 2026-06-09 182527" src="https://github.com/user-attachments/assets/6493abe5-b754-41a9-a2bb-d5f50673ee4e" />
+ | <img width="295" height="636" alt="Screenshot 2026-06-09 182734" src="https://github.com/user-attachments/assets/dc585f28-0db5-47b3-9103-df747d8fa648" />
+ |<img width="300" height="645" alt="Screenshot 2026-06-09 182837" src="https://github.com/user-attachments/assets/c64a936e-effb-40d6-986c-bb56dfe2c18f" />
+ | <img width="298" height="634" alt="Screenshot 2026-06-09 182922" src="https://github.com/user-attachments/assets/a7b48fd5-2e7e-44e6-a091-fd07f45d072c" />
+ | <img width="306" height="642" alt="Screenshot 2026-06-09 183329" src="https://github.com/user-attachments/assets/5a9b4fb7-2514-4a64-835e-7bd8c3708ac4" />
+ |
 
 | Keranjang | Checkout | Dashboard Admin |
 |---|---|---|
-| *(screenshot)* | *(screenshot)* | *(screenshot)* |
+| <img width="300" height="637" alt="Screenshot 2026-06-09 182948" src="https://github.com/user-attachments/assets/0748a97c-e70c-464e-95bc-38c6f7cc6921" />
+ | <img width="301" height="640" alt="Screenshot 2026-06-09 183053" src="https://github.com/user-attachments/assets/82715486-baef-447c-849b-829adf95da75" />
+ | <img width="1917" height="874" alt="Screenshot 2026-06-09 184007" src="https://github.com/user-attachments/assets/be0c9d8a-bea8-424b-83e3-385c79a892ad" />
+ |
 
 ---
 
