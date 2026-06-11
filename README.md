@@ -417,10 +417,7 @@ flutter run
 
 | Keranjang | Checkout | Dashboard Admin |
 |---|---|---|
-| <img width="300" height="637" alt="Screenshot 2026-06-09 182948" src="https://github.com/user-attachments/assets/0748a97c-e70c-464e-95bc-38c6f7cc6921" />
- | <img width="301" height="640" alt="Screenshot 2026-06-09 183053" src="https://github.com/user-attachments/assets/82715486-baef-447c-849b-829adf95da75" />
- | <img width="1917" height="874" alt="Screenshot 2026-06-09 184007" src="https://github.com/user-attachments/assets/be0c9d8a-bea8-424b-83e3-385c79a892ad" />
- |
+| <img width="300" height="637" alt="Screenshot 2026-06-09 182948" src="https://github.com/user-attachments/assets/0748a97c-e70c-464e-95bc-38c6f7cc6921" /> | <img width="301" height="640" alt="Screenshot 2026-06-09 183053" src="https://github.com/user-attachments/assets/82715486-baef-447c-849b-829adf95da75" /> | <img width="1917" height="874" alt="Screenshot 2026-06-09 184007" src="https://github.com/user-attachments/assets/be0c9d8a-bea8-424b-83e3-385c79a892ad" /> |
 
 ---
 
