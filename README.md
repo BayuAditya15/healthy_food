@@ -404,8 +404,8 @@ flutter run
 
 > Tambahkan screenshot aplikasi di sini.
 
-| Landing Page | Home | category | Produk Detail | Wishlist | Profile |
-|---|---|---|---|---|---|
+| Landing Page | Home | Category | Produk Detail | Wishlist | Profile |
+|-------------|------|----------|--------------|----------|---------|
 | <img width="167" height="356" alt="image" src="https://github.com/user-attachments/assets/5719aba7-c18d-41aa-aa48-ecca254415cf" />
  | <img width="295" height="640" alt="Screenshot 2026-06-09 182527" src="https://github.com/user-attachments/assets/6493abe5-b754-41a9-a2bb-d5f50673ee4e" />
  | <img width="295" height="636" alt="Screenshot 2026-06-09 182734" src="https://github.com/user-attachments/assets/dc585f28-0db5-47b3-9103-df747d8fa648" />
